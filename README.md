@@ -71,7 +71,7 @@ the install output.
 ## Installation
 
 ```bash
-git clone https://github.com/<your-org>/impnxc-cloak.git
+git clone https://github.com/patrick1357/impnxc-cloak.git
 cd impnxc-cloak
 ./install.sh          # auto-sudo: backup → patch → apt-mark hold
 ./verify.sh           # read-only: are all patches live?
