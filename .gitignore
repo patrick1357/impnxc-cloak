@@ -1,0 +1,23 @@
+# Backups created at install time (machine-specific, contain original system files)
+backups/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Claude Code project files
+.claude/
+CLAUDE.md
+
+# Internal notes
+TODO.md
+
+# Editor / OS
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# nxc_obf -- NetExec with the impacket-opsec behavioural patches ENABLED.
+#
+# Plain `nxc` stays vanilla (SMB1-first, RC4 AS-REP, 1000-SID RID bursts,
+# sample-based random names). This wrapper flips IMPACKET_OPSEC=1 so the gated
+# nxc patches activate: SMB1 negotiation off, AS-REP etype AES-first, RID
+# cycling throttled + paced, gen_random_string normalised.
+#
+# The impacket WIRE layer (ClientGuid, NTLM VERSION, dialects, hostname,
+# Kerberoast etype) is always on once ./install.sh has run -- it is not gated.
+#
+# Requires: ./install.sh has patched nxc and dropped impacket/_opsec.py.
+# Per-run tuning still works, e.g.:
+#   IMPACKET_OPSEC_WORKSTATION=FIN-WKS042 nxc_obf smb 10.0.0.0/24 -u u -p p --shares
+export IMPACKET_OPSEC=1
+
+# Cross-protocol workstation consistency. impacket-based protocols (SMB/LDAP/
+# WMI/MSSQL) read IMPACKET_OPSEC_WORKSTATION; nxc's WinRM runs on pypsrp/spnego,
+# which reads NETBIOS_COMPUTER_NAME (else leaks socket.gethostname(), i.e.
+# "kali"). Pin BOTH to one value so a single nxc_obf run presents the same
+# workstation on every protocol. An explicit override is always respected.
+if [ -z "${IMPACKET_OPSEC_WORKSTATION:-}" ]; then
+    export IMPACKET_OPSEC_WORKSTATION="DESKTOP-$(tr -dc 'A-Z0-9' </dev/urandom | head -c7)"
+fi
+export NETBIOS_COMPUTER_NAME="${NETBIOS_COMPUTER_NAME:-$IMPACKET_OPSEC_WORKSTATION}"
+
+# Exec defaults: output ON, but via goexec's quiet redirect.
+# A/B against Sophos showed the WIN-EXE-PRC-IMPACKET-WMIEXEC rule
+# keys on the explicit '1>' token -- plain '>' is semantically identical (both
+# redirect stdout) and slipped it WITH output intact + no alert. So we keep the
+# cmd.exe wrapper and output, and only swap '1>' -> '>':
+#   - EXEC_REDIRECT_STYLE=goexec -> '> <file> 2>&1'  (quiet, default here)
+#   - EXEC_NO_CMD=0              -> collect output    (default here)
+# Overrides for a run:
+#   IMPACKET_OPSEC_EXEC_NO_CMD=1 nxc_obf ...          # raw process, no cmd/no output
+#   IMPACKET_OPSEC_EXEC_REDIRECT_STYLE=stock nxc_obf ...  # back to impacket '1>'
+export IMPACKET_OPSEC_EXEC_NO_CMD="${IMPACKET_OPSEC_EXEC_NO_CMD:-0}"
+export IMPACKET_OPSEC_EXEC_REDIRECT_STYLE="${IMPACKET_OPSEC_EXEC_REDIRECT_STYLE:-goexec}"
+
+exec nxc "$@"
