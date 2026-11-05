@@ -33,7 +33,7 @@ identify it — even before authentication completes. Examples include a
 recognisable SMB2 negotiate shape, ASCII-only `ClientGuid`, leaked hostname
 (`kali`), RC4-only Kerberos requests, and hardcoded TDS handshake constants.
 
-**impacket-opsec** patches these fingerprints **in place** so the traffic
+**impnxc-cloak** patches these fingerprints **in place** so the traffic
 resembles a legitimate Windows 11 client. It operates in two layers:
 
 - **Wire layer** (always on) — pure network de-fingerprinting: binary
