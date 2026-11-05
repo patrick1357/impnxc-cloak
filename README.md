@@ -156,9 +156,12 @@ IMPACKET_OPSEC_PACE_MS_MAX=0 nxc_obf smb 10.0.0.5 -u u -p p --rid-brute 5000
 
 | Mode | Command | Behaviour |
 |---|---|---|
-| **Default** (goexec-style redirect) | `nxc_obf smb … -x whoami` | Output collected. Uses the redirect technique from [goexec](https://github.com/FalconForceTeam/goexec) (FalconForce): `>` instead of impacket's `1>`. Both are semantically identical (redirect stdout), but the different token evades the Sophos `WIN-EXE-PRC-IMPACKET-WMIEXEC` signature which matches on `1>`. |
-| **Raw / no-cmd** | `IMPACKET_OPSEC_EXEC_NO_CMD=1 nxc_obf smb … -x calc.exe` | No `cmd.exe` child, no redirect, **no output**. Only real `.exe` (no builtins/pipes). |
-| **Stock redirect** | `IMPACKET_OPSEC_EXEC_REDIRECT_STYLE=stock nxc_obf …` | Back to impacket's `1>` redirect |
+| **Default** | `nxc_obf smb … -x whoami` | Output collected. Uses the redirect technique from [goexec](https://github.com/FalconForceTeam/goexec) (FalconForce): `>` instead of impacket's `1>`. Both are semantically identical, but the different token evades the Sophos `WIN-EXE-PRC-IMPACKET-WMIEXEC` signature. |
+| **Raw / no-cmd** | `EXEC_NO_CMD=1 nxc_obf …` | No `cmd.exe` child, no redirect, **no output**. Only real `.exe` (no builtins/pipes). |
+| **Stock redirect** | `EXEC_REDIRECT_STYLE=stock nxc_obf …` | Back to impacket's `1>` redirect |
+
+> **Note:** env vars above are shortened — full prefix is `IMPACKET_OPSEC_`
+> (e.g. `IMPACKET_OPSEC_EXEC_NO_CMD=1`).
 
 ### nxc_obf Quick Reference
 
